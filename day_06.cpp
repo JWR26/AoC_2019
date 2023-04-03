@@ -12,14 +12,21 @@ void day_06::print_answers() {
 		part_1 += total_orbits(m, k.first);
 	}
 
-	std::cout << "Part 1: " << part_1 << std::endl;
+	std::cout << "Part 1: " << part_1 << '\n';
 
 	int part_2 = minimum_transfers(m, "COM", "YOU", "SAN");
 
-	std::cout << "Part 2: " << part_2 << std::endl;
+	std::cout << "Part 2: " << part_2 << '\n';
 
 }
 
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="list"></param>
+/// <param name="c"></param>
+/// <returns></returns>
 std::map <std::string, std::vector<std::string>> day_06::get_map(const std::vector<std::string> list, const char& c) {
 	std::map <std::string, std::vector<std::string>> m{};
 	
