@@ -5,13 +5,17 @@ void day_05::print_answers() {
 
 	std::vector<int> input = intcode::get_programme("input\\day_05.txt");
 
-	Intcode computer(input);
-	std::pair<bool, int> test_result = computer.run_test_diagnostic(1);
+	
+	std::vector<int> user_input { 1 };
+	Intcode computer(input, user_input);
+	int test_result = computer.run_test_diagnostic();
 
-	std::cout << "Part 1: " << test_result.second << '\n';
+	std::cout << "Part 1: " << test_result << '\n';
 
 	computer.reset_programme();
-	test_result = computer.run_test_diagnostic(5);
+	user_input[0] = 5;
+	computer.update_input(user_input);
+	test_result = computer.run_test_diagnostic();
 
-	std::cout << "Part 2: " << test_result.second << std::endl;
+	std::cout << "Part 2: " << test_result << '\n';
 }

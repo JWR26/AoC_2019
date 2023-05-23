@@ -40,3 +40,10 @@ std::vector<std::string> helper::split_string(const std::string& str, const char
 
 	return strings;
 }
+
+
+std::string& helper::remove_all_of(std::string& str, const char& c) {
+	auto is_c = [c](char t) -> bool {return c == t; };
+	str.erase(std::remove_if(str.begin(), str.end(), is_c), str.end());
+	return str;
+}

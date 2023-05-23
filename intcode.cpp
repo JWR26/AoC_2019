@@ -1,6 +1,5 @@
 #include "intcode.h"
 
-
 std::vector<int> intcode::get_programme(const std::string& path) {
 	std::ifstream data{ path };
 	std::vector<int> ints;
@@ -20,7 +19,7 @@ std::vector<int> intcode::get_programme(const std::string& path) {
 }
 
 
-Intcode::OPCODE Intcode::get_opcode(const int& instruction) {
+Intcode::OPCODE Intcode::get_opcode(const int& instruction) const {
 	Intcode::OPCODE opcode = static_cast<Intcode::OPCODE>(instruction%100);
 	return opcode;
 }
@@ -30,8 +29,7 @@ std::vector<Intcode::MODE> Intcode::get_parameter_modes(const int& instruction, 
 	std::vector<Intcode::MODE> modes;
 	int num{ 1 };
 
-	switch (opcode)
-	{
+	switch (opcode)	{
 	case ADD:
 		num = 3;
 		break;
@@ -183,47 +181,48 @@ std::vector<int>& Intcode::equals(std::vector<int>& programme, const int& pos, c
 }
 
 
-std::vector<int> Intcode::run_programme(const int& programme_input) {
+std::vector<int> Intcode::run_programme() {
 	int limit = (int) current_programme.size();
 	int delta{ 0 };
 
 	std::vector<int> programme_output;
 
-	for (int i = 0; i < limit; i += delta) {
-		Intcode::OPCODE opcode = get_opcode(current_programme[i]);
-		//std::cout << "Opcode: " << current_programme[i] << '\n';
-		std::vector<Intcode::MODE> modes = get_parameter_modes(current_programme[i], opcode);
-
-		//std::cout << "Instruction " << i << " -> ";
+	for (tick; tick < limit; tick += delta) {
+		Intcode::OPCODE opcode = get_opcode(current_programme[tick]);
+		std::vector<Intcode::MODE> modes = get_parameter_modes(current_programme[tick], opcode);
 
 		switch (opcode)
 		{
 		case ADD:
-			add(current_programme, i, modes);
+			add(current_programme, tick, modes);
 			break;
 		case MULTIPLY:
-			multiply(current_programme, i, modes);
+			multiply(current_programme, tick, modes);
 			break;
 		case INPUT:
-			input(current_programme, i, programme_input);
+			// pause and wait for new input, returning the output.
+			if (input_index >= input_list.size()) {
+				return programme_output;
+			}
+			input(current_programme, tick, input_list[input_index]);
+			++input_index;
 			break;
 		case OUTPUT:
-			programme_output.push_back(output(current_programme, i, modes));
+			programme_output.push_back(output(current_programme, tick, modes));
 			break;
 		case JUMP_IF_FALSE:
-			delta = jump_if_false(current_programme, i, modes);
+			delta = jump_if_false(current_programme, tick, modes);
 			break;
 		case JUMP_IF_TRUE:
-			delta = jump_if_true(current_programme, i, modes);
+			delta = jump_if_true(current_programme, tick, modes);
 			break;
 		case LESS_THAN:
-			less_than(current_programme, i, modes);
+			less_than(current_programme, tick, modes);
 			break;
 		case EQUALS:
-			equals(current_programme, i, modes);
+			equals(current_programme, tick, modes);
 			break;
 		case EXIT:
-			//std::cout << "Exit programme at instruction " << i <<'\n';
 			if (programme_output.empty()) {
 				programme_output.push_back(current_programme[0]);
 			}
@@ -231,7 +230,6 @@ std::vector<int> Intcode::run_programme(const int& programme_input) {
 		default:
 			break;
 		}
-		//std::cout << '\n';
 
 		if (opcode != JUMP_IF_FALSE && opcode != JUMP_IF_TRUE) {
 			delta = (int)modes.size() + 1;
@@ -242,23 +240,17 @@ std::vector<int> Intcode::run_programme(const int& programme_input) {
 }
 
 
-std::pair<bool, int> Intcode::run_test_diagnostic(const int& programme_input) {
-	std::pair<bool, int> result(true, programme_input);
-
-	std::vector<int> outputs = run_programme(programme_input);
-
+int Intcode::run_test_diagnostic() {
+	std::vector<int> outputs = run_programme();
 	int checks = (int) outputs.size() - 1;
-
+	// ensure all tests passed.
 	for (int i = 0; i < checks; ++i) {
 		if (outputs[i] != 0) {
-			//std::cout << "Result " << i << ": " << outputs[i] << " [TEST FAILED] " << '\n';;
-			result.first = false;
+			return -1;
 		}
 	}
-
-	result.second = outputs.back();
-
-	return result;
+	// return test diagnostic code
+	return outputs.back();
 }
 
 
@@ -267,6 +259,17 @@ void Intcode::update_position(const size_t& pos, const int val) {
 }
 
 
+void Intcode::update_input(const std::vector<int> i) {
+	input_list = i;
+}
+
 void Intcode::reset_programme() {
 	current_programme = original_programme;
+	input_index = 0;
+	tick = 0;
+}
+
+bool Intcode::programme_terminated() const {
+	Intcode::OPCODE opcode = get_opcode(current_programme[tick]);
+	return opcode == EXIT;
 }
