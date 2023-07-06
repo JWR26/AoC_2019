@@ -28,10 +28,7 @@ void day_02::print_answers() {
 		}
 	}
 
-	std::cout << "Part 2: " << product(noun, verb) << std::endl;
-}
+	int product = 100 * noun + verb;
 
-
-int day_02::product(const int& noun, const int& verb) {
-	return 100 * noun + verb;
+	std::cout << "Part 2: " << product << std::endl;
 }

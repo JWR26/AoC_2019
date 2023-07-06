@@ -79,8 +79,6 @@ void day_12::print_answers() {
 
 	for (int i{ 0 }; i < 4; ++i) {
 		part_1 += list[i].get_total_energy();
-		list[i].print_properties();
-		std::cout << moon_x[i] << ',' << moon_y[i] << ',' << moon_z[i] << ';' << vel_x[i] << ',' << vel_y[i] << ',' << vel_z[i] << '\n';
 	}
 
 	while (true) {
@@ -105,12 +103,6 @@ void day_12::print_answers() {
 		}
 		++z_interval;
 		move(moon_z, vel_z);
-	}
-
-	std::cout << x_interval << ',' << y_interval << ',' << z_interval << '\n';
-
-	for (int i{ 0 }; i < 4; ++i) {
-		std::cout << moon_x[i] << ',' << moon_y[i] << ',' << moon_z[i] << ';' << vel_x[i] << ',' << vel_y[i] << ',' << vel_z[i] << '\n';
 	}
 
 	part_2 = lcm(lcm(x_interval, y_interval), z_interval);

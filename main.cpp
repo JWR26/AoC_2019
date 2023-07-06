@@ -14,7 +14,7 @@
 
 int main()
 {
-    /*day_01::print_answers();
+    day_01::print_answers();
     day_02::print_answers();
     day_03::print_answers();
     day_04::print_answers();
@@ -22,10 +22,10 @@ int main()
     day_06::print_answers();
     day_07::print_answers();
     day_08::print_answers();
-    day_09::print_answers();
+    //day_09::print_answers();
     day_10::print_answers();
-    day_12::print_answers();*/
-    day_14::print_answers();
+    day_12::print_answers();
+    //day_14::print_answers();
 
     return 0;
 }

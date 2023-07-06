@@ -67,12 +67,6 @@ void day_10::print_answers() {
 	}
 	// resort by angle
 	std::sort(asteroid_positions.begin(), asteroid_positions.end(), by_angle());
-
-	
-	// print asteroids sorted to check
-	for (const auto& a : asteroid_positions) {
-		a.print();
-	}
 	
 	part_2 = asteroid_positions[199].x * 100 + asteroid_positions[199].y;
 

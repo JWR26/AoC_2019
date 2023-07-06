@@ -29,7 +29,7 @@ void day_08::print_answers() {
     }
 
 
-    std::cout << "Part 1: " << zeros << '\n';
+    std::cout << "Part 1: " << part_1 << '\n';
 
     std::cout << "Part 2: " << '\n';
 

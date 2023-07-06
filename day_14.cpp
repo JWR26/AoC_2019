@@ -1,16 +1,16 @@
 #include "day_14.h"
 
-using Input = std::vector<std::pair<std::string, int>>;
-using Reaction = std::pair<int, Input>;
+using Input = std::vector<std::pair<std::string, long>>;
+using Reaction = std::pair<long, Input>;
 
-int get_factor(const int& required, const int& produced) {
+long get_factor(const long& required, const long& produced) {
 	if (produced >= required) {
 		return 1;
 	}
 	if (required % produced == 0) {
 		return required / produced;
 	}
-	int f = required / produced;
+	long f = required / produced;
 	return f + 1;
 }
 
@@ -19,6 +19,7 @@ void day_14::print_answers() {
 	// read the file into a map
 	std::map<std::string, Reaction> reactions;
 	std::vector<std::string> input_data = helper::read_file("input\\day_14.txt");
+	// read the file 
 	for (auto& s : input_data) {
 		helper::remove_all_of(s, ' ');
 		helper::remove_all_of(s, '=');
@@ -40,39 +41,41 @@ void day_14::print_answers() {
 		reactions[product] = std::make_pair(std::stoi(number), input_list);
 	}
 
-	std::stack<std::pair<std::string, int>> chemical_stack;
+	std::stack<std::pair<std::string, long>> chemical_stack;
 	Reaction start = reactions["FUEL"];
-	int required{ start.first };
+	long required{ start.first };
 	Input input_chemicals{ start.second };
 	for (auto& i : input_chemicals) {
 		i.second *= required;
 		chemical_stack.push(i);
 	}
 
-	std::map<std::string, int> ore_products;
-	std::map<std::string, int> remainders;
+	std::map<std::string, long> ore_products;
+	std::map<std::string, long> remainders;
 
 	while (!chemical_stack.empty()) {
-		std::pair<std::string, int> next = chemical_stack.top();
+		std::pair<std::string, long> next = chemical_stack.top();
 		chemical_stack.pop();
+
+		std::cout << "Require " << next.second << " of " << next.first << '\n';
+
 		if (remainders.find(next.first) != remainders.end()) {
-			int diff = next.second > remainders[next.first] ? remainders[next.first] : next.second;
+			std::cout << "  Remainder available: " << remainders[next.first] << '\n';
+			long diff = next.second > remainders[next.first] ? remainders[next.first] : next.second;
 			next.second -= diff;
 			remainders[next.first] -= diff;
 		}
-		std::cout << "Require " << next.second << " of " << next.first << '.';
+		
 		start = reactions[next.first];
 		required = get_factor(next.second, start.first);
-		int remainder = next.second % start.first;
-		if (remainder > 0) {
-			if (remainders.find(next.first) != remainders.end()) {
+		long remainder = next.second % start.first;
+		if (remainders.find(next.first) != remainders.end()) {
 				remainders[next.first] += start.first - remainder;
-			}
-			else {
-				remainders[next.first] = start.first - remainder;
-			}
 		}
-		std::cout << "Remainder of " << next.first << ": " << remainders[next.first] << '\n';
+		else {
+				remainders[next.first] = start.first - remainder;
+		}
+		std::cout << "-> Remainder of " << next.first << ": " << remainders[next.first] << '\n';
 		input_chemicals = start.second;
 		for (auto& i : input_chemicals) {
 			if (i.first == "ORE") {
@@ -87,7 +90,7 @@ void day_14::print_answers() {
 			}
 			i.second *= required;
 			if (remainders.find(i.first) != remainders.end()) {
-				int diff = i.second > remainders[i.first] ? remainders[i.first] : i.second;
+				long diff = i.second > remainders[i.first] ? remainders[i.first] : i.second;
 				i.second -= diff;
 				remainders[i.first] -= diff;
 			}
@@ -97,9 +100,9 @@ void day_14::print_answers() {
 		}
 	};
 
-	int ore{ 0 };
+	long ore{ 0 };
 	for (const auto& [prod, quantity] : ore_products) {
-		int factor{ get_factor(quantity, reactions[prod].first) };
+		long factor{ get_factor(quantity, reactions[prod].first) };
 		ore += reactions[prod].second[0].second * factor;
 	}
 

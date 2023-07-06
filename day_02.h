@@ -12,7 +12,6 @@
 namespace day_02 {
 	void print_answers();
 	std::vector<int> update_programme(std::vector<int>& original, const int& n, const int& v);
-	int product(const int& noun, const int& verb);
 }
 
 
