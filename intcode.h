@@ -95,22 +95,14 @@ private:
 		return modes;
 	}
 	
-	std::vector<T>& add(std::vector<T>& programme, const int& pos, const std::vector<MODE>& modes) {
+	template<typename T, typename O>
+	std::vector<T>& modify(std::vector<T>& programme, const int& pos, const std::vector<MODE>& modes, O op) {
 		T lhs{ get_parameter(programme, pos, 1, modes[0]) };
 		T rhs{ get_parameter(programme, pos, 2, modes[1]) };
-		if (modes[2] == MODE::POSITION) {
-			programme[programme[pos + 3]] = lhs + rhs;
-		}
+		programme[programme[pos + 3]] = op(lhs,rhs);
 		return programme;
 	}
-	
-	std::vector<T>& multiply(std::vector<T>& programme, const int& pos, const std::vector<MODE>& modes) {
-		T lhs{ get_parameter(programme, pos, 1, modes[0]) };
-		T rhs{ get_parameter(programme, pos, 2, modes[1]) };
-		programme[programme[pos + 3]] = lhs * rhs;
-		return programme;
-	}
-	
+
 	std::vector<T>& input(std::vector<T>& programme, const int& pos, const int& input) {
 		programme[programme[pos + 1]] = input;
 		return programme;
@@ -154,10 +146,10 @@ public:
 			switch (opcode)
 			{
 			case ADD:
-				add(current_programme, tick, modes);
+				modify(current_programme, tick, modes, std::plus<T>());
 				break;
 			case MULTIPLY:
-				multiply(current_programme, tick, modes);
+				modify(current_programme, tick, modes, std::multiplies<T>());
 				break;
 			case INPUT:
 				// pause and wait for new input, returning the output.
