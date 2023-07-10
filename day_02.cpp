@@ -1,7 +1,7 @@
 #include "day_02.h"
 
 void day_02::print_answers() {
-	std::cout << "\n--- Day 2: 1202 Program Alarm ---\n" << std::endl;
+	std::cout << "\n--- Day 2: 1202 Program Alarm ---\n" << '\n';
 
 	std::vector<int> input = intcode::get_programme("input\\day_02.txt");
 

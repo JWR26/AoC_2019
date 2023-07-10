@@ -19,7 +19,7 @@ std::vector<int> intcode::get_programme(const std::string& path) {
 }
 
 
-std::vector<long long int> intcode::get_ll_programme(const std::string& path) {
+std::vector<long long int> intcode::get_long_programme(const std::string& path) {
 	std::ifstream data{ path };
 	std::vector<long long int> ints;
 	ints.reserve(500); // arbitrary number bigger than the list

@@ -7,10 +7,9 @@
 #include "helper.h"
 
 
-
 namespace intcode {
 	std::vector<int> get_programme(const std::string& path);
-	std::vector<long long int> get_ll_programme(const std::string& path);
+	std::vector<long long int> get_long_programme(const std::string& path);
 }
 
 template <typename T>
@@ -38,21 +37,46 @@ class Intcode {
 private:
 	std::vector<T> current_programme;
 	const std::vector<T> original_programme;
-	std::vector<int> input_list;
-	int input_index{ 0 };
-	int tick{ 0 };
-	int relative_base{ 0 };
+	std::vector<T> input_list;
+	T input_index{ 0 };
+	T tick{ 0 };
+	T relative_base{ 0 };
 
 	OPCODE get_opcode(const T& instruction) const {
 		Intcode::OPCODE opcode = static_cast<Intcode::OPCODE>(instruction % 100);
 		return opcode;
 	}
 
-	T get_parameter(const std::vector<T>& programme, const int& pos, const int& diff, const MODE& m) {
+	void resize_programme(const T& new_size) {
+		current_programme.reserve(new_size + 1);
+		while ((T)current_programme.size() < new_size + 1) {
+			current_programme.emplace_back(0);
+		};
+	}
+
+	T get_index(const std::vector<T>& programme, const T& pos, const T& diff, const MODE& m) {
+		T index{ 0 };
+
 		if (m == MODE::IMMEDIATE) {
-			return programme[pos + diff];
+			std::cout << "Immediate Mode. ";
+			index = pos + diff;
 		}
-		return programme[programme[pos + diff]];
+		else if (m == MODE::RELATIVE) {
+			index = relative_base + programme[pos + diff];
+			std::cout << "Relative Mode. ";
+			std::cout << "Delta of " << programme[pos + diff] << '\n';
+		}
+		else {
+			std::cout << "Position Mode. ";
+			index = programme[pos + diff];
+		}
+		std::cout << "Index is: " << index << '\n';
+
+		if (index >= (T)programme.size()) {
+			resize_programme(index);
+		}
+
+		return index;
 	}
 
 	std::vector<MODE> get_parameter_modes(const T& instruction, const Intcode::OPCODE& opcode) {
@@ -65,12 +89,6 @@ private:
 			break;
 		case MULTIPLY:
 			num = 3;
-			break;
-		case INPUT:
-			num = 1;
-			break;
-		case OUTPUT:
-			num = 1;
 			break;
 		case JUMP_IF_TRUE:
 			num = 2;
@@ -96,22 +114,23 @@ private:
 	}
 	
 	template<typename T, typename O>
-	std::vector<T>& modify(std::vector<T>& programme, const int& pos, const std::vector<MODE>& modes, O op) {
-		T lhs{ get_parameter(programme, pos, 1, modes[0]) };
-		T rhs{ get_parameter(programme, pos, 2, modes[1]) };
-		programme[programme[pos + 3]] = op(lhs,rhs);
+	std::vector<T>& modify(std::vector<T>& programme, const T& pos, const std::vector<MODE>& modes, O op) {
+		T lhs{ programme[get_index(programme, pos, 1, modes[0])] };
+		T rhs{ programme[get_index(programme, pos, 2, modes[1])] };
+		programme[get_index(programme, pos, 3, modes[2])] = op(lhs,rhs);
+
 		return programme;
 	}
 
-	std::vector<T>& input(std::vector<T>& programme, const int& pos, const int& input) {
-		programme[programme[pos + 1]] = input;
+	std::vector<T>& input(std::vector<T>& programme, const T& pos, const T& input, const std::vector<MODE>& modes) {
+		programme[get_index(programme, pos, 1, modes[0])] = input;
 		return programme;
 	}
 	
 	template<typename T, typename C>
-	T jump(const std::vector<T>& programme, const int& pos, const std::vector<MODE>& modes, C comp) {
-		T first { get_parameter(programme, pos, 1, modes[0]) };
-		T second { get_parameter(programme, pos, 2, modes[1]) };
+	T jump(const std::vector<T>& programme, const T& pos, const std::vector<MODE>& modes, C comp) {
+		T first { programme[get_index(programme, pos, 1, modes[0])] };
+		T second{ programme[get_index(programme, pos, 2, modes[1])] };
 
 		if ( comp(first, 0) ) {
 			return second - pos;
@@ -121,21 +140,27 @@ private:
 	}
 
 	template<typename T, typename C>
-	std::vector<T>& compare(std::vector<T>& programme, const int& pos, const std::vector<MODE>& modes, C comp) {
-		T first{ get_parameter(programme, pos, 1, modes[0]) };
-		T second{ get_parameter(programme, pos, 2, modes[1]) };
+	std::vector<T>& compare(std::vector<T>& programme, const T& pos, const std::vector<MODE>& modes, C comp) {
+		T first{ programme[get_index(programme, pos, 1, modes[0])] };
+		T second{ programme[get_index(programme, pos, 2, modes[1])] };
 
-		programme[programme[pos + 3]] = comp(first, second) ? 1 : 0;
+		programme[get_index(programme, pos, 3, modes[2])] = comp(first, second) ? 1 : 0;
 
 		return programme;
+	}
+
+	void update_relative_base(const std::vector<T>& programme, const T& pos, const MODE& m) {
+		T change{ programme[get_index(programme, pos, 1, m)] };
+		std::cout << "Change to relative base: " << change << '\n';
+		relative_base += change;
 	}
 
 public:
 	Intcode(const std::vector<T>& p, const std::vector<T>& i = {}) : current_programme(p), original_programme(p), input_list(i) {}
 
 	std::vector<T> run_programme() {
-		int limit = (int)current_programme.size();
-		int delta{ 0 };
+		T limit = (T)current_programme.size();
+		T delta{ 0 };
 
 		std::vector<T> programme_output;
 
@@ -143,38 +168,54 @@ public:
 			Intcode::OPCODE opcode = get_opcode(current_programme[tick]);
 			std::vector<Intcode::MODE> modes = get_parameter_modes(current_programme[tick], opcode);
 
+			std::cout << "\nInstruction " << tick << ':' << current_programme[tick] << '\n';
+
 			switch (opcode)
 			{
 			case ADD:
+				std::cout << "Modify - Add...\n";
 				modify(current_programme, tick, modes, std::plus<T>());
 				break;
 			case MULTIPLY:
+				std::cout << "Modify - Multiply...\n";
 				modify(current_programme, tick, modes, std::multiplies<T>());
 				break;
 			case INPUT:
 				// pause and wait for new input, returning the output.
-				if (input_index >= input_list.size()) {
+				std::cout << "Input...\n";
+				if (input_index >= (T)input_list.size()) {
 					return programme_output;
 				}
-				input(current_programme, tick, input_list[input_index]);
+				input(current_programme, tick, input_list[input_index], modes);
 				++input_index;
 				break;
 			case OUTPUT:
-				programme_output.push_back(get_parameter(current_programme, tick, 1, modes[0]));
+				std::cout << "Output...\n";
+				programme_output.push_back(current_programme[get_index(current_programme, tick, 1, modes[0])]);
 				break;
 			case JUMP_IF_FALSE:
+				std::cout << "Jump - False...\n";
 				delta = jump(current_programme, tick, modes, std::equal_to<T>());
 				break;
 			case JUMP_IF_TRUE:
+				std::cout << "Jump - True...\n";
 				delta = jump(current_programme, tick, modes, std::not_equal_to<T>());
 				break;
 			case LESS_THAN:
+				std::cout << "Compare - Less than...\n";
 				compare(current_programme, tick, modes, std::less<T>());
 				break;
 			case EQUALS:
+				std::cout << "Compare - Equals...\n";
 				compare(current_programme, tick, modes, std::equal_to<T>());
 				break;
+			case OFFSET:
+				std::cout << "Updating relative base...\n";
+				std::cout << "Relative Base pre-update: " << relative_base << '\n';
+				update_relative_base(current_programme, tick, modes[0]);
+				break;
 			case EXIT:
+				std::cout << "Exiting programme...\n";
 				if (programme_output.empty()) {
 					programme_output.push_back(current_programme[0]);
 				}
