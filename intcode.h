@@ -48,29 +48,26 @@ private:
 	}
 
 	void resize_programme(const T& new_size) {
-		current_programme.reserve(new_size + 1);
-		while ((T)current_programme.size() < new_size + 1) {
-			current_programme.emplace_back(0);
-		};
+		current_programme.resize(new_size + 1, 0);
 	}
 
 	T get_index(const std::vector<T>& programme, const T& pos, const T& diff, const MODE& m) {
 		T index{ 0 };
 
 		if (m == MODE::IMMEDIATE) {
-			std::cout << "Immediate Mode. ";
+			//std::cout << "Immediate Mode. ";
 			index = pos + diff;
 		}
 		else if (m == MODE::RELATIVE) {
 			index = relative_base + programme[pos + diff];
-			std::cout << "Relative Mode. ";
-			std::cout << "Delta of " << programme[pos + diff] << '\n';
+			//std::cout << "Relative Mode. ";
+			//std::cout << "Delta of " << programme[pos + diff] << '\n';
 		}
 		else {
-			std::cout << "Position Mode. ";
+			//std::cout << "Position Mode. ";
 			index = programme[pos + diff];
 		}
-		std::cout << "Index is: " << index << '\n';
+		//std::cout << "Index is: " << index << '\n';
 
 		if (index >= (T)programme.size()) {
 			resize_programme(index);
@@ -151,7 +148,7 @@ private:
 
 	void update_relative_base(const std::vector<T>& programme, const T& pos, const MODE& m) {
 		T change{ programme[get_index(programme, pos, 1, m)] };
-		std::cout << "Change to relative base: " << change << '\n';
+		//std::cout << "Change to relative base: " << change << '\n';
 		relative_base += change;
 	}
 
@@ -168,21 +165,21 @@ public:
 			Intcode::OPCODE opcode = get_opcode(current_programme[tick]);
 			std::vector<Intcode::MODE> modes = get_parameter_modes(current_programme[tick], opcode);
 
-			std::cout << "\nInstruction " << tick << ':' << current_programme[tick] << '\n';
+			//std::cout << "\nInstruction " << tick << ':' << current_programme[tick] << '\n';
 
 			switch (opcode)
 			{
 			case ADD:
-				std::cout << "Modify - Add...\n";
+				//std::cout << "Modify - Add...\n";
 				modify(current_programme, tick, modes, std::plus<T>());
 				break;
 			case MULTIPLY:
-				std::cout << "Modify - Multiply...\n";
+				//std::cout << "Modify - Multiply...\n";
 				modify(current_programme, tick, modes, std::multiplies<T>());
 				break;
 			case INPUT:
 				// pause and wait for new input, returning the output.
-				std::cout << "Input...\n";
+				//std::cout << "Input...\n";
 				if (input_index >= (T)input_list.size()) {
 					return programme_output;
 				}
@@ -190,32 +187,32 @@ public:
 				++input_index;
 				break;
 			case OUTPUT:
-				std::cout << "Output...\n";
+				//std::cout << "Output...\n";
 				programme_output.push_back(current_programme[get_index(current_programme, tick, 1, modes[0])]);
 				break;
 			case JUMP_IF_FALSE:
-				std::cout << "Jump - False...\n";
+				//std::cout << "Jump - False...\n";
 				delta = jump(current_programme, tick, modes, std::equal_to<T>());
 				break;
 			case JUMP_IF_TRUE:
-				std::cout << "Jump - True...\n";
+				//std::cout << "Jump - True...\n";
 				delta = jump(current_programme, tick, modes, std::not_equal_to<T>());
 				break;
 			case LESS_THAN:
-				std::cout << "Compare - Less than...\n";
+				//std::cout << "Compare - Less than...\n";
 				compare(current_programme, tick, modes, std::less<T>());
 				break;
 			case EQUALS:
-				std::cout << "Compare - Equals...\n";
+				//std::cout << "Compare - Equals...\n";
 				compare(current_programme, tick, modes, std::equal_to<T>());
 				break;
 			case OFFSET:
-				std::cout << "Updating relative base...\n";
-				std::cout << "Relative Base pre-update: " << relative_base << '\n';
+				//std::cout << "Updating relative base...\n";
+				//std::cout << "Relative Base pre-update: " << relative_base << '\n';
 				update_relative_base(current_programme, tick, modes[0]);
 				break;
 			case EXIT:
-				std::cout << "Exiting programme...\n";
+				//std::cout << "Exiting programme...\n";
 				if (programme_output.empty()) {
 					programme_output.push_back(current_programme[0]);
 				}
@@ -257,6 +254,7 @@ public:
 		current_programme = original_programme;
 		input_index = 0;
 		tick = 0;
+		relative_base = 0;
 	}
 
 	bool programme_terminated() const {
