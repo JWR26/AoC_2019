@@ -14,11 +14,9 @@ long get_factor(const long& required, const long& produced) {
 	return f + 1;
 }
 
-
-void day_14::print_answers() {
-	// read the file into a map
+long calculate_ore(const std::string& file_path) {
 	std::map<std::string, Reaction> reactions;
-	std::vector<std::string> input_data = helper::read_file("input\\day_14.txt");
+	std::vector<std::string> input_data = helper::read_file(file_path);
 	// read the file 
 	for (auto& s : input_data) {
 		helper::remove_all_of(s, ' ');
@@ -57,35 +55,25 @@ void day_14::print_answers() {
 		std::pair<std::string, long> next = chemical_stack.top();
 		chemical_stack.pop();
 
-		std::cout << "Require " << next.second << " of " << next.first << '\n';
+		//std::cout << "Require " << next.second << " of " << next.first << '\n';
 
 		if (remainders.find(next.first) != remainders.end()) {
-			std::cout << "  Remainder available: " << remainders[next.first] << '\n';
+			//std::cout << "  Remainder available: " << remainders[next.first] << '\n';
 			long diff = next.second > remainders[next.first] ? remainders[next.first] : next.second;
 			next.second -= diff;
 			remainders[next.first] -= diff;
 		}
-		
+
 		start = reactions[next.first];
 		required = get_factor(next.second, start.first);
-		long remainder = next.second % start.first;
-		if (remainders.find(next.first) != remainders.end()) {
-				remainders[next.first] += start.first - remainder;
-		}
-		else {
-				remainders[next.first] = start.first - remainder;
-		}
-		std::cout << "-> Remainder of " << next.first << ": " << remainders[next.first] << '\n';
+		long remainder = start.first * required - next.second;
+		remainders[next.first] += remainder;
+		//std::cout << "-> Remainder of " << next.first << ": " << remainders[next.first] << '\n';
 		input_chemicals = start.second;
 		for (auto& i : input_chemicals) {
 			if (i.first == "ORE") {
 				remainders[next.first] = 0;
-				if (ore_products.find(next.first) != ore_products.end()) {
-					ore_products[next.first] += next.second;
-				}
-				else {
-					ore_products[next.first] = next.second;
-				}
+				ore_products[next.first] += next.second;
 				break;
 			}
 			i.second *= required;
@@ -106,5 +94,33 @@ void day_14::print_answers() {
 		ore += reactions[prod].second[0].second * factor;
 	}
 
-	std::cout << ore;
+	return ore;
+}
+
+
+
+void perform_test(const std::string& file_path, const long& expected) {
+	long actual{ calculate_ore(file_path) };
+	std::string result { actual == expected ? "PASS" : "FAIL" };
+	std::cout << "Test Result: " << result << '\n';
+	if (actual != expected) {
+		std::cout << "Actual: " << actual << ". Expected: " << expected << '\n';
+	}
+}
+
+
+void day_14::print_answers() {
+	// read the file into a map
+
+
+	std::cout << "\n--- Day 14: Space Stoichiometry ---\n" << '\n';
+	
+	perform_test("input\\test_14.txt", 31);
+	perform_test("input\\test_14a.txt", 165);
+	perform_test("input\\test_14b.txt", 13312);
+	perform_test("input\\test_14c.txt", 180697);
+	perform_test("input\\test_14d.txt", 2210736);
+	std::cout << '\n';
+
+	std::cout << "Part 1: " << calculate_ore("input\\day_14.txt") << '\n';
 }
