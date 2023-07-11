@@ -1,20 +1,20 @@
 #include "day_14.h"
 
-using Input = std::vector<std::pair<std::string, long>>;
-using Reaction = std::pair<long, Input>;
+using Input = std::vector<std::pair<std::string, uint64_t>>;
+using Reaction = std::pair<uint64_t, Input>;
 
-long get_factor(const long& required, const long& produced) {
+uint64_t get_factor(const uint64_t& required, const uint64_t& produced) {
 	if (produced >= required) {
 		return 1;
 	}
 	if (required % produced == 0) {
 		return required / produced;
 	}
-	long f = required / produced;
+	uint64_t f = required / produced;
 	return f + 1;
 }
 
-long calculate_ore(const std::string& file_path) {
+uint64_t calculate_ore(const std::string& file_path) {
 	std::map<std::string, Reaction> reactions;
 	std::vector<std::string> input_data = helper::read_file(file_path);
 	// read the file 
@@ -39,34 +39,34 @@ long calculate_ore(const std::string& file_path) {
 		reactions[product] = std::make_pair(std::stoi(number), input_list);
 	}
 
-	std::stack<std::pair<std::string, long>> chemical_stack;
+	std::stack<std::pair<std::string, uint64_t>> chemical_stack;
 	Reaction start = reactions["FUEL"];
-	long required{ start.first };
+	uint64_t required{ start.first };
 	Input input_chemicals{ start.second };
 	for (auto& i : input_chemicals) {
 		i.second *= required;
 		chemical_stack.push(i);
 	}
 
-	std::map<std::string, long> ore_products;
-	std::map<std::string, long> remainders;
+	std::map<std::string, uint64_t> ore_products;
+	std::map<std::string, uint64_t> remainders;
 
 	while (!chemical_stack.empty()) {
-		std::pair<std::string, long> next = chemical_stack.top();
+		std::pair<std::string, uint64_t> next = chemical_stack.top();
 		chemical_stack.pop();
 
 		//std::cout << "Require " << next.second << " of " << next.first << '\n';
 
 		if (remainders.find(next.first) != remainders.end()) {
 			//std::cout << "  Remainder available: " << remainders[next.first] << '\n';
-			long diff = next.second > remainders[next.first] ? remainders[next.first] : next.second;
+			uint64_t diff = next.second > remainders[next.first] ? remainders[next.first] : next.second;
 			next.second -= diff;
 			remainders[next.first] -= diff;
 		}
 
 		start = reactions[next.first];
 		required = get_factor(next.second, start.first);
-		long remainder = start.first * required - next.second;
+		uint64_t remainder = start.first * required - next.second;
 		remainders[next.first] += remainder;
 		//std::cout << "-> Remainder of " << next.first << ": " << remainders[next.first] << '\n';
 		input_chemicals = start.second;
@@ -78,7 +78,7 @@ long calculate_ore(const std::string& file_path) {
 			}
 			i.second *= required;
 			if (remainders.find(i.first) != remainders.end()) {
-				long diff = i.second > remainders[i.first] ? remainders[i.first] : i.second;
+				uint64_t diff = i.second > remainders[i.first] ? remainders[i.first] : i.second;
 				i.second -= diff;
 				remainders[i.first] -= diff;
 			}
@@ -88,9 +88,9 @@ long calculate_ore(const std::string& file_path) {
 		}
 	};
 
-	long ore{ 0 };
+	uint64_t ore{ 0 };
 	for (const auto& [prod, quantity] : ore_products) {
-		long factor{ get_factor(quantity, reactions[prod].first) };
+		uint64_t factor{ get_factor(quantity, reactions[prod].first) };
 		ore += reactions[prod].second[0].second * factor;
 	}
 
@@ -99,8 +99,8 @@ long calculate_ore(const std::string& file_path) {
 
 
 
-void perform_test(const std::string& file_path, const long& expected) {
-	long actual{ calculate_ore(file_path) };
+void perform_test(const std::string& file_path, const uint64_t& expected) {
+	uint64_t actual{ calculate_ore(file_path) };
 	std::string result { actual == expected ? "PASS" : "FAIL" };
 	std::cout << "Test Result: " << result << '\n';
 	if (actual != expected) {
@@ -110,9 +110,6 @@ void perform_test(const std::string& file_path, const long& expected) {
 
 
 void day_14::print_answers() {
-	// read the file into a map
-
-
 	std::cout << "\n--- Day 14: Space Stoichiometry ---\n" << '\n';
 	
 	perform_test("input\\test_14.txt", 31);
@@ -123,4 +120,5 @@ void day_14::print_answers() {
 	std::cout << '\n';
 
 	std::cout << "Part 1: " << calculate_ore("input\\day_14.txt") << '\n';
+	std::cout << "Part 2: " << '\n';
 }
