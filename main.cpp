@@ -15,6 +15,7 @@
 #include "day_14.h"
 #include "day_15.h"
 #include "day_16.h"
+#include "day_17.h"
 
 
 int main()
@@ -35,6 +36,7 @@ int main()
     day_14::print_answers();
     day_15::print_answers();
     day_16::print_answers();
+    day_17::print_answers();
 
     return 0;
 }

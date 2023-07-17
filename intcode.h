@@ -250,6 +250,10 @@ public:
 		input_list = i;
 	}
 
+	void add_input_instruction(const T i) {
+		input_list.push_back(i);
+	}
+
 	void reset_programme() {
 		current_programme = original_programme;
 		input_index = 0;

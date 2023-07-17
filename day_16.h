@@ -1,6 +1,7 @@
 #ifndef DAY_16
 #define DAY_16
 
+#include <array>
 #include <iostream>
 #include <vector>
 

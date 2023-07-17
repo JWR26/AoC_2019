@@ -5,6 +5,7 @@
 #include <set>
 #include <utility>
 
+#include "helper.h"
 #include "intcode.h"
 
 
@@ -13,16 +14,6 @@ namespace day_11 {
 	void print_answers();
 }
 
-
-struct Position {
-	int X, Y;
-
-	Position(const int& x, const int& y) : X(x), Y(y) {}
-
-	bool operator < (const Position& other) const {
-		return (X < other.X || (X == other.X && Y < other.Y));
-	}
-};
 
 
 template<typename T>
@@ -71,19 +62,19 @@ private:
 		{
 		case DIRECTION::LEFT:
 			//std::cout << "Left\n";
-			pos.X -= 1;
+			pos.x -= 1;
 			break;
 		case DIRECTION::RIGHT:
 			//std::cout << "Right\n";
-			pos.X += 1;
+			pos.x += 1;
 			break;
 		case DIRECTION::DOWN:
 			//std::cout << "Down\n";
-			pos.Y -= 1;
+			pos.y -= 1;
 			break;
 		case DIRECTION::UP:
 			//std::cout << "Up\n";
-			pos.Y += 1;
+			pos.y += 1;
 			break;
 		default:
 			break;
@@ -156,23 +147,23 @@ public:
 		int min_x{ 0 }, min_y{ 0 }, max_x{ 0 }, max_y{ 0 };
 
 		for (const auto& w : white_panels) {
-			min_x = w.X < min_x ? w.X : min_x;
-			max_x = w.X > max_x ? w.X : max_x;
-			min_y = w.Y < min_y ? w.Y : min_y;
-			max_y = w.Y > max_y ? w.Y : max_y;
+			min_x = w.x < min_x ? w.x : min_x;
+			max_x = w.x > max_x ? w.x : max_x;
+			min_y = w.y < min_y ? w.y : min_y;
+			max_y = w.y > max_y ? w.y : max_y;
 		}
 
 		for (const auto& w : black_panels) {
-			min_x = w.X < min_x ? w.X : min_x;
-			max_x = w.X > max_x ? w.X : max_x;
-			min_y = w.Y < min_y ? w.Y : min_y;
-			max_y = w.Y > max_y ? w.Y : max_y;
+			min_x = w.x < min_x ? w.x : min_x;
+			max_x = w.x > max_x ? w.x : max_x;
+			min_y = w.y < min_y ? w.y : min_y;
+			max_y = w.y > max_y ? w.y : max_y;
 		}
 
 		std::vector<char> panels(number_panels_painted(), ' ');
 
 		for (const auto& w : white_panels) {
-			int index{ (w.X + max_x - min_x) + w.Y * (min_x - max_x)};
+			int index{ (w.x + max_x - min_x) + w.y * (min_x - max_x)};
 			if (index > panels.size() - 1) {
 				panels.resize(index+1, '.');
 			}

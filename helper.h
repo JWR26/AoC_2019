@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iostream>
 #include <fstream>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -19,5 +20,48 @@ namespace helper {
 
 }
 
+
+struct Position {
+	int x, y;
+
+	// default constructor 
+	Position() {}
+
+	Position(const int& _x, const int& _y) : x(_x), y(_y) {}
+
+	Position(const Position& other) {
+		x = other.x;
+		y = other.y;
+	}
+
+	void print() const {
+		std::cout << "Position(x,y): " << x << ',' << y << '\n';
+	}
+
+	bool operator<(const Position& other) const {
+		return (x < other.x || (x == other.x && y < other.y));
+	}
+
+	bool operator==(const Position& other) const {
+		return (x == other.x && y == other.y);
+	}
+
+	bool operator!=(const Position& other) const {
+		return (x != other.x || y != other.y);
+	}
+
+	Position& operator=(const Position& other) {
+		this->x = other.x;
+		this->y = other.y;
+		return *this;
+	}
+
+	Position& operator+=(const Position& other) {
+		this->x += other.x;
+		this->y += other.y;
+		return *this;
+	}
+
+};
 
 #endif // helper
