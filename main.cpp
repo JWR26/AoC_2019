@@ -16,6 +16,7 @@
 #include "day_15.h"
 #include "day_16.h"
 #include "day_17.h"
+#include "day_19.h"
 
 
 int main()
@@ -32,11 +33,14 @@ int main()
     day_10::print_answers();
     day_11::print_answers();
     day_12::print_answers();
-    day_13::print_answers();*/
+    day_13::print_answers();
     day_14::print_answers();
     day_15::print_answers();
     day_16::print_answers();
-    day_17::print_answers();
+    day_17::print_answers();*/
+
+    day_19::print_answers();
+
 
     return 0;
 }

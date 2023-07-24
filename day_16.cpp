@@ -9,7 +9,7 @@ std::vector<int> test_sig_1 {1, 2, 3, 4, 5, 6, 7, 8 };
 
 // forward declarations
 std::vector<int> chars_to_ints(const std::string& path);
-std::vector<int> construct_list(const std::vector<int>& list);
+std::vector<int> construct_list(const std::vector<int>& list, const int& start = 0, const int& multiplier = 1);
 std::vector<int> get_pattern(const int& i);
 
 
@@ -19,18 +19,35 @@ void day_16::print_answers() {
 	// get FFT input from the file.
 	std::vector<int> signal {chars_to_ints("input\\day_16.txt")};
 
-	for (int i { 0 }; i < PHASES; ++i) {
-		signal = construct_list(signal);
-	}
-
 	std::cout << "Part 1: ";
 
+	std::vector<int> part_1(signal);
+	
+	for (int i{ 0 }; i < PHASES; ++i) {
+		part_1 = construct_list(part_1);
+	}
+	
 	for (size_t i{ 0 }; i < 8; ++i) {
-		std::cout << signal[i];
+		std::cout << part_1[i];
+	}
+	std::cout << '\n';
+
+	std::cout << "Part 2: ";
+
+	int message_offset{ 0 };
+
+	for (size_t i{ 0 }; i < 8; ++i) {
+		message_offset *= 10;
+		message_offset += signal[i];
+	}
+
+	signal = construct_list(signal, message_offset, 10000);
+	for (int i{ 1 }; i < PHASES; ++i) {
+		signal = construct_list(signal, message_offset);
 	}
 
 	std::cout << '\n';
-	std::cout << "Part 2: " << '\n';
+
 }
 
 
@@ -44,15 +61,23 @@ std::vector<int> chars_to_ints(const std::string& path) {
 	return integers;
 }
 
-std::vector<int> construct_list(const std::vector<int>& list) {
-	std::vector<int> new_list(list.size());
+// add start and multiplication factor
+std::vector<int> construct_list(const std::vector<int>& list, const int& start, const int& multiplier) {
+	std::vector<int> new_list(list.size() * multiplier, 0);
 
-	for (int i{ 0 }; i < new_list.size(); ++i) {
-		std::vector<int> pattern(get_pattern(i + 1));
+	int limit = static_cast<int>(new_list.size()) * multiplier;
+
+	for (int i{ start }; i < limit; ++i) {
+		// pattern only needed for first half of list, second half is just 1.
+		std::vector<int> pattern({ 1 });
+		if (i < limit / 2) {
+			pattern = get_pattern(i + 1);
+		}
 		int sum{ 0 };
-		for (int j{ 0 }; j < new_list.size(); ++j) {
+		int old_limit = static_cast<int>(list.size());
+		for (int j{ i }; j < limit; ++j) {
 			int p_index{ (j + 1) % static_cast<int>(pattern.size()) };
-			sum += list[j] * pattern[p_index];
+			sum += list[j%old_limit] * pattern[p_index];
 		}
 		new_list[i] = abs(sum % 10);
 	}
