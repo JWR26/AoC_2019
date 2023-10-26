@@ -192,8 +192,7 @@ int flood_fill(const Map& m, const Position& start) {
 		// for each position, get the neighbours and fill them and add them to the 
 		std::vector<Position> temp;
 		for (const auto& i : next) {
-			std::set<Position> neighbours = m.at(i);
-			for (const auto& n : neighbours) {
+			for (const auto& n : m.at(i)) {
 				auto result = flooded.insert(n);
 				if (result.second) {
 					temp.push_back(n);
